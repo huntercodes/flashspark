@@ -1,18 +1,35 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import './App.css';
+import { Flashcard } from './src/types/Flashcard';
+import { fetchFlashcards } from './src/services/flashcardService';
+import FlashcardComponent from './src/types/Flashcard';
 
 function App() {
-  const [message, setMessage] = useState('');
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/')
-      .then(res => res.text())
-      .then(setMessage);
+    fetchFlashcards()
+      .then(data => {
+        setFlashcards(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        setLoading(false);
+      });
   }, []);
 
+  if (loading) return <p>Loading flashcards...</p>;
+
   return (
-    <div>
+    <div className="App">
       <h1>FlashSpark</h1>
-      <p>{message}</p>
+      <div className="flashcard-container">
+        {flashcards.map(card => (
+          <FlashcardComponent key={card.id} card={card} />
+        ))}
+      </div>
     </div>
   );
 }
